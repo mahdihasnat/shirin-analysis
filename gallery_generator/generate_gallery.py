@@ -1,14 +1,15 @@
 import os
+import json
+import re
 
-def generate_gallery(frames_dir, output_file="index.html"):
+def generate_gallery(frames_dir, output_file="frames.json"):
     """
-    Generates an HTML gallery for images in the frames directory.
+    Generates a JSON file containing the list of images, optimized with ranges.
     
     Args:
         frames_dir (str): Path to the directory containing images.
-        output_file (str): Path to the output HTML file.
+        output_file (str): Path to the output JSON file.
     """
-    # Use absolute paths for checking file existence but relative for HTML
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Resolve frames_dir relative to the script location
@@ -21,85 +22,85 @@ def generate_gallery(frames_dir, output_file="index.html"):
         print(f"Error: Frames directory not found: {abs_frames_dir}")
         return
 
+    # Get all image files
     images = sorted([f for f in os.listdir(abs_frames_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))])
     
-    html_content = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extracted Frames Gallery</title>
-    <style>
-        body {{
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }}
-        h1 {{
-            text-align: center;
-            color: #333;
-        }}
-        .gallery {{
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            padding: 10px;
-        }}
-        .gallery-item {{
-            background-color: white;
-            padding: 5px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }}
-        .gallery-item img {{
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 3px;
-        }}
-        .gallery-item p {{
-            margin: 5px 0 0;
-            font-size: 0.8em;
-            color: #666;
-        }}
-    </style>
-</head>
-<body>
-    <h1>Extracted Frames Gallery</h1>
-    <div class="gallery">
-"""
+    items = []
     
-    for img in images:
-        # Construct path relative to the HTML file location (which is script_dir)
-        # We assume frames_dir path passed in is already relative or we make it relative
-        
-        # Calculate relative path from script_dir to image file
-        img_abs_path = os.path.join(abs_frames_dir, img)
-        rel_path = os.path.relpath(img_abs_path, script_dir)
-        
-        html_content += f"""
-        <div class="gallery-item">
-            <img src="{rel_path}" alt="{img}" loading="lazy">
-            <p>{img}</p>
-        </div>
-"""
+    # Regex to parse filenames: prefix, number, extension
+    # e.g., "frame_0001.jpg" -> "frame_", "0001", ".jpg"
+    pattern = re.compile(r'^(.*?)(\d+)(\.[a-zA-Z0-9]+)$')
+    
+    if not images:
+        print("No images found.")
+        return
 
-    html_content += """
-    </div>
-</body>
-</html>
-"""
+    current_range = None
+
+    for img in images:
+        match = pattern.match(img)
+        
+        if match:
+            prefix, num_str, ext = match.groups()
+            num = int(num_str)
+            digits = len(num_str)
+            
+            # Check if this file continues the current range
+            if current_range and \
+               current_range['prefix'] == prefix and \
+               current_range['extension'] == ext and \
+               current_range['digits'] == digits and \
+               num == current_range['end'] + 1:
+                
+                current_range['end'] = num
+            else:
+                # Close previous range if it exists
+                if current_range:
+                    items.append(current_range)
+                
+                # Start new range
+                current_range = {
+                    "type": "range",
+                    "prefix": prefix,
+                    "start": num,
+                    "end": num,
+                    "digits": digits,
+                    "extension": ext
+                }
+        else:
+            # Non-matching file (no number sequence), treat as individual item
+            if current_range:
+                items.append(current_range)
+                current_range = None
+            items.append(img)
+
+    # Append the last range if exists
+    if current_range:
+        items.append(current_range)
+
+    # Clean up single-item ranges to just be filenames? 
+    # Optional, but keep it consistent for now. 
+    # Actually, if start==end, we could convert back to string to save a tiny bit of client-side processing,
+    # but having uniform objects is fine too. Let's stick to the logic.
+
+    # Calculate relative path for basePath
+    # frames_dir passed in is likely relative to PWD, but we want relative to index.html (script_dir)
+    # If frames_dir was "../frame_extractor/output", we assume that's valid from index.html location too.
+    
+    # Let's strictly calculate relative path from script_dir -> abs_frames_dir
+    rel_base_path = os.path.relpath(abs_frames_dir, script_dir)
+
+    data = {
+        "basePath": rel_base_path,
+        "items": items
+    }
 
     output_path = os.path.join(script_dir, output_file)
     with open(output_path, "w") as f:
-        f.write(html_content)
+        json.dump(data, f, indent=2)
     
-    print(f"Gallery generated at: {output_path}")
+    print(f"Gallery data generated at: {output_path}")
 
 if __name__ == "__main__":
-    # Frames are in ../frame_extractor/output relative to this script
     frames_directory = "../frame_extractor/output"
     generate_gallery(frames_directory)
