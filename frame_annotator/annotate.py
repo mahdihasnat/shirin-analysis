@@ -81,8 +81,6 @@ def main():
     parser = argparse.ArgumentParser(description="Analyze frames and generate JSON annotations.")
     parser.add_argument("--frames-dir", default="../frame_extractor/output", help="Directory containing frames")
     parser.add_argument("--output-dir", default="../gallery_generator", help="Directory to save JSON files")
-    parser.add_argument("--skip-detection", action="store_true", help="Skip face detection (fast mode)")
-    
     args = parser.parse_args()
 
     # Setup paths
@@ -116,28 +114,25 @@ def main():
     # 2. Face Detection
     people_frames = []
     
-    if not args.skip_detection:
-        print("Loading face detector...")
-        # Load pre-trained face detector from opencv directly
-        # We need to find the path where cv2 keeps its data or download it.
-        # cv2.data.haarcascades usually points to the installed location
-        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-        face_cascade = cv2.CascadeClassifier(cascade_path)
-        
-        if face_cascade.empty():
-            print("Error: Could not load haarcascade_frontalface_default.xml")
-            return
+    print("Loading face detector...")
+    # Load pre-trained face detector from opencv directly
+    # We need to find the path where cv2 keeps its data or download it.
+    # cv2.data.haarcascades usually points to the installed location
+    cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+    face_cascade = cv2.CascadeClassifier(cascade_path)
+    
+    if face_cascade.empty():
+        print("Error: Could not load haarcascade_frontalface_default.xml")
+        return
 
-        print(f"Analyzing {len(images)} frames for people (this may take a while)...")
-        for i, img_name in enumerate(images):
-            if i % 100 == 0:
-                print(f"Processed {i}/{len(images)} frames...")
-                
-            img_path = os.path.join(abs_frames_dir, img_name)
-            if detect_faces(img_path, face_cascade):
-                people_frames.append(img_name)
-    else:
-        print("Skipping detection as requested.")
+    print(f"Analyzing {len(images)} frames for people (this may take a while)...")
+    for i, img_name in enumerate(images):
+        if i % 100 == 0:
+            print(f"Processed {i}/{len(images)} frames...")
+            
+        img_path = os.path.join(abs_frames_dir, img_name)
+        if detect_faces(img_path, face_cascade):
+            people_frames.append(img_name)
 
     # 3. Generate JSONs
     print("Generating JSON files...")
@@ -155,21 +150,20 @@ def main():
         json.dump(all_data, f, indent=2)
 
     # frames_people.json
-    if not args.skip_detection:
-        people_data = {
-            "basePath": rel_base_path,
-            "items": compress_to_ranges(people_frames)
-        }
-        with open(os.path.join(abs_output_dir, "frames_people.json"), "w") as f:
-            json.dump(people_data, f, indent=2)
+    # frames_people.json
+    people_data = {
+        "basePath": rel_base_path,
+        "items": compress_to_ranges(people_frames)
+    }
+    with open(os.path.join(abs_output_dir, "frames_people.json"), "w") as f:
+        json.dump(people_data, f, indent=2)
 
     # filters.json
     filters = [
         {"id": "all", "name": "All Frames", "file": "frames_all.json", "default": True},
     ]
     
-    if not args.skip_detection:
-        filters.append({"id": "people", "name": "People Detected", "file": "frames_people.json"})
+    filters.append({"id": "people", "name": "People Detected", "file": "frames_people.json"})
     
     with open(os.path.join(abs_output_dir, "filters.json"), "w") as f:
         json.dump(filters, f, indent=2)
