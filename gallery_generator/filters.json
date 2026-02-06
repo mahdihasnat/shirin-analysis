@@ -1,0 +1,13 @@
+[
+  {
+    "id": "all",
+    "name": "All Frames",
+    "file": "frames_all.json",
+    "default": true
+  },
+  {
+    "id": "people",
+    "name": "People Detected",
+    "file": "frames_people.json"
+  }
+]
