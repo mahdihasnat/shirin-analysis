@@ -7,7 +7,27 @@
   },
   {
     "id": "people",
-    "name": "People Detected",
+    "name": "People Detected (Any)",
     "file": "frames_people.json"
+  },
+  {
+    "id": "people_1",
+    "name": "1 Person",
+    "file": "frames_people_1.json"
+  },
+  {
+    "id": "people_2",
+    "name": "2 People",
+    "file": "frames_people_2.json"
+  },
+  {
+    "id": "people_3",
+    "name": "3 People",
+    "file": "frames_people_3.json"
+  },
+  {
+    "id": "people_4",
+    "name": "4 People",
+    "file": "frames_people_4.json"
   }
 ]

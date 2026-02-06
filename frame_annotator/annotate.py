@@ -63,19 +63,19 @@ def compress_to_ranges(items):
 def detect_faces(image_path, face_cascade):
     """
     Detects faces in an image using OpenCV.
-    Returns True if at least one face is detected, False otherwise.
+    Returns the number of detected faces.
     """
     try:
         img = cv2.imread(image_path)
         if img is None:
-            return False
+            return 0
         
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-        return len(faces) > 0
+        return len(faces)
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
-        return False
+        return 0
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze frames and generate JSON annotations.")
@@ -113,6 +113,7 @@ def main():
 
     # 2. Face Detection
     people_frames = []
+    frames_by_count = {} # count -> list of frames
     
     print("Loading face detector...")
     # Load pre-trained face detector from opencv directly
@@ -131,8 +132,14 @@ def main():
             print(f"Processed {i}/{len(images)} frames...")
             
         img_path = os.path.join(abs_frames_dir, img_name)
-        if detect_faces(img_path, face_cascade):
+        count = detect_faces(img_path, face_cascade)
+        
+        if count > 0:
             people_frames.append(img_name)
+            
+            if count not in frames_by_count:
+                frames_by_count[count] = []
+            frames_by_count[count].append(img_name)
 
     # 3. Generate JSONs
     print("Generating JSON files...")
@@ -149,21 +156,39 @@ def main():
     with open(os.path.join(abs_output_dir, "frames_all.json"), "w") as f:
         json.dump(all_data, f, indent=2)
 
-    # frames_people.json
-    # frames_people.json
+    # frames_people.json (Any people detected)
     people_data = {
         "basePath": rel_base_path,
         "items": compress_to_ranges(people_frames)
     }
     with open(os.path.join(abs_output_dir, "frames_people.json"), "w") as f:
         json.dump(people_data, f, indent=2)
+        
+    # frames_people_N.json (Specific counts)
+    for count, frames in frames_by_count.items():
+        count_data = {
+            "basePath": rel_base_path,
+            "items": compress_to_ranges(frames)
+        }
+        filename = f"frames_people_{count}.json"
+        with open(os.path.join(abs_output_dir, filename), "w") as f:
+            json.dump(count_data, f, indent=2)
 
     # filters.json
     filters = [
         {"id": "all", "name": "All Frames", "file": "frames_all.json", "default": True},
+        {"id": "people", "name": "People Detected (Any)", "file": "frames_people.json"}
     ]
     
-    filters.append({"id": "people", "name": "People Detected", "file": "frames_people.json"})
+    # Sort counts for display
+    sorted_counts = sorted(frames_by_count.keys())
+    for count in sorted_counts:
+        name = f"{count} Person" if count == 1 else f"{count} People"
+        filters.append({
+            "id": f"people_{count}",
+            "name": name,
+            "file": f"frames_people_{count}.json"
+        })
     
     with open(os.path.join(abs_output_dir, "filters.json"), "w") as f:
         json.dump(filters, f, indent=2)

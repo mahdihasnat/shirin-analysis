@@ -1,0 +1,13 @@
+{
+  "basePath": "../frame_extractor/output",
+  "items": [
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 360,
+      "end": 360,
+      "digits": 4,
+      "extension": ".jpg"
+    }
+  ]
+}
