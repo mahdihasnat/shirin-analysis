@@ -63,19 +63,25 @@ def compress_to_ranges(items):
 def detect_faces(image_path, face_cascade):
     """
     Detects faces in an image using OpenCV.
-    Returns the number of detected faces.
+    Returns a list of bounding boxes [(x, y, w, h), ...].
     """
     try:
         img = cv2.imread(image_path)
         if img is None:
-            return 0
+            return []
         
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-        return len(faces)
+        
+        # Convert numpy int32 to python int for JSON serialization
+        faces_list = []
+        for (x, y, w, h) in faces:
+            faces_list.append((int(x), int(y), int(w), int(h)))
+            
+        return faces_list
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
-        return 0
+        return []
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze frames and generate JSON annotations.")
@@ -114,6 +120,7 @@ def main():
     # 2. Face Detection
     people_frames = []
     frames_by_count = {} # count -> list of frames
+    faces_metadata = {} # filename -> list of [x,y,w,h]
     
     print("Loading face detector...")
     # Load pre-trained face detector from opencv directly
@@ -132,10 +139,12 @@ def main():
             print(f"Processed {i}/{len(images)} frames...")
             
         img_path = os.path.join(abs_frames_dir, img_name)
-        count = detect_faces(img_path, face_cascade)
+        faces = detect_faces(img_path, face_cascade)
+        count = len(faces)
         
         if count > 0:
             people_frames.append(img_name)
+            faces_metadata[img_name] = faces
             
             if count not in frames_by_count:
                 frames_by_count[count] = []
@@ -147,6 +156,10 @@ def main():
     # Calculate relative path from output_dir to frames_dir for the JSON "basePath"
     # This is critical for the HTML to find the images relative to itself
     rel_base_path = os.path.relpath(abs_frames_dir, abs_output_dir)
+
+    # faces_metadata.json
+    with open(os.path.join(abs_output_dir, "faces_metadata.json"), "w") as f:
+        json.dump(faces_metadata, f, separators=(',', ':')) # Minify slightly to save space
 
     # frames_all.json
     all_data = {
