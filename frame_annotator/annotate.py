@@ -3,6 +3,7 @@ import json
 import re
 import cv2
 import argparse
+import urllib.request
 
 def compress_to_ranges(items):
     """
@@ -60,9 +61,29 @@ def compress_to_ranges(items):
         
     return compressed_items
 
-def detect_faces(image_path, face_cascade):
+def download_dnn_models(script_dir):
+    """Download OpenCV DNN face detection models if not present."""
+    models_dir = os.path.join(script_dir, 'models')
+    os.makedirs(models_dir, exist_ok=True)
+    
+    prototxt_path = os.path.join(models_dir, 'deploy.prototxt')
+    caffemodel_path = os.path.join(models_dir, 'res10_300x300_ssd_iter_140000.caffemodel')
+    
+    if not os.path.exists(prototxt_path):
+        print("Downloading prototxt...")
+        url = 'https://raw.githubusercontent.com/opencv/opencv/master/samples/dnn/face_detector/deploy.prototxt'
+        urllib.request.urlretrieve(url, prototxt_path)
+    
+    if not os.path.exists(caffemodel_path):
+        print("Downloading model weights (this may take a moment)...")
+        url = 'https://raw.githubusercontent.com/opencv/opencv_3rdparty/dnn_samples_face_detector_20170830/res10_300x300_ssd_iter_140000.caffemodel'
+        urllib.request.urlretrieve(url, caffemodel_path)
+    
+    return prototxt_path, caffemodel_path
+
+def detect_faces_dnn(image_path, net, conf_threshold=0.5):
     """
-    Detects faces in an image using OpenCV.
+    Detects faces in an image using OpenCV DNN (ResNet SSD).
     Returns a list of bounding boxes [(x, y, w, h), ...].
     """
     try:
@@ -70,14 +91,32 @@ def detect_faces(image_path, face_cascade):
         if img is None:
             return []
         
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+        height, width = img.shape[:2]
         
-        # Convert numpy int32 to python int for JSON serialization
+        # Create blob from image
+        blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+        
+        net.setInput(blob)
+        detections = net.forward()
+        
         faces_list = []
-        for (x, y, w, h) in faces:
-            faces_list.append((int(x), int(y), int(w), int(h)))
+        
+        # Loop over detections
+        for i in range(detections.shape[2]):
+            confidence = detections[0, 0, i, 2]
             
+            if confidence > conf_threshold:
+                box = detections[0, 0, i, 3:7] * [width, height, width, height]
+                (x1, y1, x2, y2) = box.astype("int")
+                
+                # Convert to x, y, w, h format
+                x = int(max(0, x1))
+                y = int(max(0, y1))
+                w = int(max(0, x2 - x1))
+                h = int(max(0, y2 - y1))
+                
+                faces_list.append((x, y, w, h))
+        
         return faces_list
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
@@ -87,6 +126,8 @@ def main():
     parser = argparse.ArgumentParser(description="Analyze frames and generate JSON annotations.")
     parser.add_argument("--frames-dir", default="../frame_extractor/output", help="Directory containing frames")
     parser.add_argument("--output-dir", default="../gallery_generator", help="Directory to save JSON files")
+    parser.add_argument("--confidence", type=float, default=0.5, help="Minimum detection confidence (0.0-1.0)")
+    
     args = parser.parse_args()
 
     # Setup paths
@@ -122,24 +163,17 @@ def main():
     frames_by_count = {} # count -> list of frames
     faces_metadata = {} # filename -> list of [x,y,w,h]
     
-    print("Loading face detector...")
-    # Load pre-trained face detector from opencv directly
-    # We need to find the path where cv2 keeps its data or download it.
-    # cv2.data.haarcascades usually points to the installed location
-    cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-    face_cascade = cv2.CascadeClassifier(cascade_path)
+    print("Loading OpenCV DNN face detector (ResNet SSD)...")
+    prototxt_path, caffemodel_path = download_dnn_models(script_dir)
+    net = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
     
-    if face_cascade.empty():
-        print("Error: Could not load haarcascade_frontalface_default.xml")
-        return
-
-    print(f"Analyzing {len(images)} frames for people (this may take a while)...")
+    print(f"Analyzing {len(images)} frames for people using DNN detector...")
     for i, img_name in enumerate(images):
         if i % 100 == 0:
             print(f"Processed {i}/{len(images)} frames...")
             
         img_path = os.path.join(abs_frames_dir, img_name)
-        faces = detect_faces(img_path, face_cascade)
+        faces = detect_faces_dnn(img_path, net, args.confidence)
         count = len(faces)
         
         if count > 0:
@@ -159,7 +193,7 @@ def main():
 
     # faces_metadata.json
     with open(os.path.join(abs_output_dir, "faces_metadata.json"), "w") as f:
-        json.dump(faces_metadata, f, separators=(',', ':')) # Minify slightly to save space
+        json.dump(faces_metadata, f, separators=(',', ':'))
 
     # frames_all.json
     all_data = {
@@ -206,7 +240,7 @@ def main():
     with open(os.path.join(abs_output_dir, "filters.json"), "w") as f:
         json.dump(filters, f, indent=2)
 
-    print("Success! Annotations generated.")
+    print(f"Success! Detected faces in {len(people_frames)} frames using OpenCV DNN.")
 
 if __name__ == "__main__":
     main()
