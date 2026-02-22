@@ -4,6 +4,9 @@ import re
 import cv2
 import argparse
 import urllib.request
+import numpy as np
+from deepface import DeepFace
+from sklearn.cluster import DBSCAN
 
 def compress_to_ranges(items):
     """
@@ -122,11 +125,57 @@ def detect_faces_dnn(image_path, net, conf_threshold=0.5):
         print(f"Error processing {image_path}: {e}")
         return []
 
+def extract_embeddings(image_path, faces):
+    """
+    Extracts face embeddings using DeepFace for a list of bounding boxes.
+    Requires passing the pre-cropped face to avoid re-detecting.
+    """
+    embeddings = []
+    
+    img = cv2.imread(image_path)
+    if img is None:
+        return [None] * len(faces)
+    
+    for (x, y, w, h) in faces:
+        try:
+            # Add padding
+            pad = max(int(min(w, h) * 0.1), 1)
+            y1 = max(0, y - pad)
+            y2 = min(img.shape[0], y + h + pad)
+            x1 = max(0, x - pad)
+            x2 = min(img.shape[1], x + w + pad)
+            
+            face_crop = img[y1:y2, x1:x2]
+            if face_crop.size == 0:
+                embeddings.append(None)
+                continue
+
+            # Generate embedding using Facenet (good balance of speed/accuracy)
+            # enforce_detection=False because we already cropped exactly to the face
+            embedding_objs = DeepFace.represent(img_path=face_crop, model_name="Facenet", enforce_detection=False)
+            
+            if embedding_objs and len(embedding_objs) > 0:
+                embeddings.append(embedding_objs[0]["embedding"])
+            else:
+                embeddings.append(None)
+        except Exception as e:
+            print(f"Warning: Deepface failed to extract embedding for face in {image_path}: {e}")
+            embeddings.append(None)
+            
+    return embeddings
+
+def restrict_float_range(val):
+    f = float(val)
+    if f <= 0.0 or f >= 2.0:
+        raise argparse.ArgumentTypeError(f"Value must be between 0.0 and 2.0. Got {val}")
+    return f
+
 def main():
     parser = argparse.ArgumentParser(description="Analyze frames and generate JSON annotations.")
     parser.add_argument("--frames-dir", default="../frame_extractor/output", help="Directory containing frames")
     parser.add_argument("--output-dir", default="../gallery_generator", help="Directory to save JSON files")
     parser.add_argument("--confidence", type=float, default=0.5, help="Minimum detection confidence (0.0-1.0)")
+    parser.add_argument("--eps", type=restrict_float_range, default=0.45, help="DBSCAN epsilon for face clustering (0.0 to 2.0 for cosine distance. Higher = fewer clusters)")
     
     args = parser.parse_args()
 
@@ -158,37 +207,98 @@ def main():
         print("No images found.")
         return
 
-    # 2. Face Detection
+    # 2. Face Detection & Embeddings Extraction
     people_frames = []
     frames_by_count = {} # count -> list of frames
-    faces_metadata = {} # filename -> list of [x,y,w,h]
+    
+    # Store all faces globally for clustering
+    # List of tuples: (filename, face_index_in_file, bbox, embedding)
+    all_faces_data = []
     
     print("Loading OpenCV DNN face detector (ResNet SSD)...")
     prototxt_path, caffemodel_path = download_dnn_models(script_dir)
     net = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
     
-    print(f"Analyzing {len(images)} frames for people using DNN detector...")
+    # Warm up DeepFace so we don't count its initialization in the loop
+    print("Initializing DeepFace (Facenet)...")
+    try:
+        # Dummy call to force model download
+        dummy_img = np.zeros((100, 100, 3), dtype=np.uint8)
+        DeepFace.represent(dummy_img, model_name="Facenet", enforce_detection=False)
+    except:
+        pass
+
+    print(f"Analyzing {len(images)} frames for people using DNN detector and extracting features...")
     for i, img_name in enumerate(images):
         if i % 100 == 0:
             print(f"Processed {i}/{len(images)} frames...")
             
         img_path = os.path.join(abs_frames_dir, img_name)
         faces = detect_faces_dnn(img_path, net, args.confidence)
-        count = len(faces)
         
-        if count > 0:
-            people_frames.append(img_name)
-            faces_metadata[img_name] = faces
+        if len(faces) > 0:
+            embeddings = extract_embeddings(img_path, faces)
             
+            for face_idx, (bbox, emb) in enumerate(zip(faces, embeddings)):
+                if emb is not None:
+                    all_faces_data.append({
+                        "filename": img_name,
+                        "face_idx": face_idx,
+                        "bbox": bbox,
+                        "embedding": emb
+                    })
+                    
+            people_frames.append(img_name)
+            
+            count = len(faces)
             if count not in frames_by_count:
                 frames_by_count[count] = []
             frames_by_count[count].append(img_name)
 
-    # 3. Generate JSONs
+    # 3. Clustering
+    print(f"Extracted {len(all_faces_data)} valid face embeddings. Starting clustering...")
+    faces_metadata = {} # filename -> list of dicts: {"box": [x,y,w,h], "person_id": ID}
+    frames_by_person = {} # person_id -> set of filenames
+    
+    # Pre-populate faces_metadata with empty lists for all detected frames
+    for f in people_frames:
+        faces_metadata[f] = []
+
+    if len(all_faces_data) > 0:
+        # Convert embeddings to numpy array
+        X = np.array([item["embedding"] for item in all_faces_data])
+        
+        # Use cosine distance for facial embeddings
+        # eps parameter determines how close faces need to be to be the "same person"
+        # 0.45 is a decent starting point for Facenet cosine distance
+        dbscan = DBSCAN(eps=args.eps, min_samples=3, metric="cosine")
+        labels = dbscan.fit_predict(X)
+        
+        # Map labels back to metadata
+        for i, item in enumerate(all_faces_data):
+            label = int(labels[i])
+            filename = item["filename"]
+            
+            # Label -1 means noise (unidentified person)
+            person_id = None if label == -1 else label
+            
+            faces_metadata[filename].append({
+                "box": item["bbox"],
+                "person_id": person_id
+            })
+            
+            if person_id is not None:
+                if person_id not in frames_by_person:
+                    frames_by_person[person_id] = set()
+                frames_by_person[person_id].add(filename)
+    
+    # Sort person frame sets
+    for p_id in frames_by_person:
+        frames_by_person[p_id] = sorted(list(frames_by_person[p_id]))
+
+    # 4. Generate JSONs
     print("Generating JSON files...")
     
-    # Calculate relative path from output_dir to frames_dir for the JSON "basePath"
-    # This is critical for the HTML to find the images relative to itself
     rel_base_path = os.path.relpath(abs_frames_dir, abs_output_dir)
 
     # faces_metadata.json
@@ -220,6 +330,32 @@ def main():
         filename = f"frames_people_{count}.json"
         with open(os.path.join(abs_output_dir, filename), "w") as f:
             json.dump(count_data, f, indent=2)
+            
+    # frames_person_N.json (Identified individuals)
+    person_filters = []
+    # Identify top people by number of appearances (optional, sort descending)
+    sorted_people = sorted(frames_by_person.items(), key=lambda x: len(x[1]), reverse=True)
+    
+    for rank, (p_id, frames) in enumerate(sorted_people):
+        # We cap at generating top N filters to avoid spam if algorithm misbehaves
+        # Let's say top 20 identified characters
+        if rank >= 20: 
+            # Still generate json, just not filter maybe, or just do all
+            pass
+            
+        person_data = {
+            "basePath": rel_base_path,
+            "items": compress_to_ranges(frames)
+        }
+        filename = f"frames_person_{p_id}.json"
+        with open(os.path.join(abs_output_dir, filename), "w") as f:
+            json.dump(person_data, f, indent=2)
+            
+        person_filters.append({
+            "id": f"person_{p_id}",
+            "name": f"Person {p_id} ({len(frames)} frames)",
+            "file": filename
+        })
 
     # filters.json
     filters = [
@@ -227,7 +363,6 @@ def main():
         {"id": "people", "name": "People Detected (Any)", "file": "frames_people.json"}
     ]
     
-    # Sort counts for display
     sorted_counts = sorted(frames_by_count.keys())
     for count in sorted_counts:
         name = f"{count} Person" if count == 1 else f"{count} People"
@@ -236,11 +371,18 @@ def main():
             "name": name,
             "file": f"frames_people_{count}.json"
         })
+        
+    if person_filters:
+        # Add a visual separator grouping in the UI could be nice, but simple concat works
+        filters.extend(person_filters)
     
     with open(os.path.join(abs_output_dir, "filters.json"), "w") as f:
         json.dump(filters, f, indent=2)
 
-    print(f"Success! Detected faces in {len(people_frames)} frames using OpenCV DNN.")
+    num_identified = len(frames_by_person)
+    unidentified = sum(1 for f in all_faces_data if f.get('person_id') is None) # -1 in dbscan
+    
+    print(f"Success! Detected {num_identified} distinct individuals across {len(people_frames)} frames.")
 
 if __name__ == "__main__":
     main()
