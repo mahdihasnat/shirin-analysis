@@ -5,6 +5,7 @@ import cv2
 import argparse
 import urllib.request
 import numpy as np
+import multiprocessing
 from deepface import DeepFace
 from sklearn.cluster import DBSCAN
 
@@ -164,6 +165,29 @@ def extract_embeddings(image_path, faces):
             
     return embeddings
 
+def process_frame(args_tuple):
+    """
+    Worker function for multiprocessing. 
+    args_tuple = (img_path, img_name, net_config, conf_threshold)
+    net_config contains paths to prototxt and caffemodel since net object is not picklable.
+    """
+    img_path, img_name, prototxt_path, caffemodel_path, conf_threshold = args_tuple
+    
+    # Needs to init its own net locally per process
+    net = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
+    
+    faces = detect_faces_dnn(img_path, net, conf_threshold)
+    
+    faces_data = [] # (face_idx, bbox, embedding)
+    
+    if len(faces) > 0:
+        embeddings = extract_embeddings(img_path, faces)
+        for face_idx, (bbox, emb) in enumerate(zip(faces, embeddings)):
+            if emb is not None:
+                faces_data.append((face_idx, bbox, emb))
+                
+    return img_name, len(faces), faces_data
+
 def restrict_float_range(val):
     f = float(val)
     if f <= 0.0 or f >= 2.0:
@@ -171,6 +195,12 @@ def restrict_float_range(val):
     return f
 
 def main():
+    # Fix for TensorFlow multiprocessing deadlocks on Linux
+    try:
+        multiprocessing.set_start_method('spawn')
+    except RuntimeError:
+        pass
+        
     parser = argparse.ArgumentParser(description="Analyze frames and generate JSON annotations.")
     parser.add_argument("--frames-dir", default="../frame_extractor/output", help="Directory containing frames")
     parser.add_argument("--output-dir", default="../gallery_generator", help="Directory to save JSON files")
@@ -228,32 +258,38 @@ def main():
     except:
         pass
 
-    print(f"Analyzing {len(images)} frames for people using DNN detector and extracting features...")
-    for i, img_name in enumerate(images):
-        if i % 100 == 0:
-            print(f"Processed {i}/{len(images)} frames...")
-            
+    print(f"Analyzing {len(images)} frames using DNN detector and multiprocessing...")
+    
+    # Prepare arguments for multiprocessing
+    tasks = []
+    for img_name in images:
         img_path = os.path.join(abs_frames_dir, img_name)
-        faces = detect_faces_dnn(img_path, net, args.confidence)
+        tasks.append((img_path, img_name, prototxt_path, caffemodel_path, args.confidence))
         
-        if len(faces) > 0:
-            embeddings = extract_embeddings(img_path, faces)
+    num_cores = max(1, multiprocessing.cpu_count() - 1)
+    print(f"Using {num_cores} cores.")
+
+    with multiprocessing.Pool(processes=num_cores) as pool:
+        for i, result in enumerate(pool.imap_unordered(process_frame, tasks)):
+            if (i+1) % 100 == 0:
+                print(f"Processed {i+1}/{len(images)} frames...")
+                
+            img_name, count, faces_data = result
             
-            for face_idx, (bbox, emb) in enumerate(zip(faces, embeddings)):
-                if emb is not None:
+            if count > 0:
+                people_frames.append(img_name)
+                
+                if count not in frames_by_count:
+                    frames_by_count[count] = []
+                frames_by_count[count].append(img_name)
+                
+                for face_idx, bbox, emb in faces_data:
                     all_faces_data.append({
                         "filename": img_name,
                         "face_idx": face_idx,
                         "bbox": bbox,
                         "embedding": emb
                     })
-                    
-            people_frames.append(img_name)
-            
-            count = len(faces)
-            if count not in frames_by_count:
-                frames_by_count[count] = []
-            frames_by_count[count].append(img_name)
 
     # 3. Clustering
     print(f"Extracted {len(all_faces_data)} valid face embeddings. Starting clustering...")

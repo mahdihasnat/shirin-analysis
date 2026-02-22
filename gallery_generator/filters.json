@@ -24,5 +24,10 @@
     "id": "people_3",
     "name": "3 People",
     "file": "frames_people_3.json"
+  },
+  {
+    "id": "person_0",
+    "name": "Person 0 (5113 frames)",
+    "file": "frames_person_0.json"
   }
 ]
