@@ -246,8 +246,8 @@
         }
 
         async function applyFilters() {
-            // Get selected filters
-            const selectedIds = Array.from(filterContainer.querySelectorAll('input:checked')).map(i => i.value);
+            // Get selected filters (extract the true ID by stripping the 'filter-' prefix)
+            const selectedIds = Array.from(filterContainer.querySelectorAll('input:checked')).map(i => i.id.replace('filter-', ''));
 
             if (selectedIds.length === 0) {
                 gallery.innerHTML = '';
