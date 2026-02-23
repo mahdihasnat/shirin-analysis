@@ -4,40 +4,32 @@
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1263,
-      "end": 1263,
+      "start": 2077,
+      "end": 2077,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1265,
-      "end": 1266,
+      "start": 4893,
+      "end": 4893,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1269,
-      "end": 1270,
+      "start": 4896,
+      "end": 4896,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1275,
-      "end": 1277,
-      "digits": 4,
-      "extension": ".jpg"
-    },
-    {
-      "type": "range",
-      "prefix": "frame_",
-      "start": 1901,
-      "end": 1903,
+      "start": 4903,
+      "end": 4903,
       "digits": 4,
       "extension": ".jpg"
     }

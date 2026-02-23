@@ -4,72 +4,88 @@
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 356,
-      "end": 357,
+      "start": 322,
+      "end": 328,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 355,
-      "end": 355,
+      "start": 331,
+      "end": 332,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 370,
-      "end": 370,
+      "start": 334,
+      "end": 334,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 369,
-      "end": 369,
+      "start": 2517,
+      "end": 2518,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 876,
-      "end": 876,
+      "start": 2528,
+      "end": 2532,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3381,
-      "end": 3382,
+      "start": 2535,
+      "end": 2535,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3380,
-      "end": 3380,
+      "start": 2538,
+      "end": 2540,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3384,
-      "end": 3384,
+      "start": 3195,
+      "end": 3201,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3383,
-      "end": 3383,
+      "start": 3203,
+      "end": 3204,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 3206,
+      "end": 3206,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 3208,
+      "end": 3211,
       "digits": 4,
       "extension": ".jpg"
     }

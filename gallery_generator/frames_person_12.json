@@ -4,72 +4,96 @@
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 356,
-      "end": 357,
+      "start": 190,
+      "end": 190,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 355,
-      "end": 355,
+      "start": 198,
+      "end": 199,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 370,
-      "end": 370,
+      "start": 267,
+      "end": 290,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 369,
-      "end": 369,
+      "start": 1643,
+      "end": 1649,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 876,
-      "end": 876,
+      "start": 2542,
+      "end": 2543,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3381,
-      "end": 3382,
+      "start": 2546,
+      "end": 2548,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3380,
-      "end": 3380,
+      "start": 2550,
+      "end": 2550,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3384,
-      "end": 3384,
+      "start": 2553,
+      "end": 2555,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3383,
-      "end": 3383,
+      "start": 2558,
+      "end": 2559,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 2563,
+      "end": 2563,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 4121,
+      "end": 4124,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 4126,
+      "end": 4144,
       "digits": 4,
       "extension": ".jpg"
     }

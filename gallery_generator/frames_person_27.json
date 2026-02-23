@@ -4,40 +4,56 @@
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1263,
-      "end": 1263,
+      "start": 1298,
+      "end": 1299,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1265,
-      "end": 1266,
+      "start": 2621,
+      "end": 2625,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1269,
-      "end": 1270,
+      "start": 2628,
+      "end": 2631,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1275,
-      "end": 1277,
+      "start": 2637,
+      "end": 2637,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1901,
-      "end": 1903,
+      "start": 2639,
+      "end": 2640,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 3667,
+      "end": 3668,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 3682,
+      "end": 3682,
       "digits": 4,
       "extension": ".jpg"
     }

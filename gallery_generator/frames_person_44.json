@@ -4,72 +4,88 @@
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 356,
-      "end": 357,
+      "start": 1138,
+      "end": 1148,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 355,
-      "end": 355,
+      "start": 1150,
+      "end": 1156,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 370,
-      "end": 370,
+      "start": 2123,
+      "end": 2123,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 369,
-      "end": 369,
+      "start": 2130,
+      "end": 2130,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 876,
-      "end": 876,
+      "start": 2133,
+      "end": 2133,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3381,
-      "end": 3382,
+      "start": 2135,
+      "end": 2137,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3380,
-      "end": 3380,
+      "start": 2139,
+      "end": 2141,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3384,
-      "end": 3384,
+      "start": 2442,
+      "end": 2442,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 3383,
-      "end": 3383,
+      "start": 2446,
+      "end": 2446,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 2462,
+      "end": 2462,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 2464,
+      "end": 2464,
       "digits": 4,
       "extension": ".jpg"
     }

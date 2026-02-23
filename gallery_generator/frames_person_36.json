@@ -4,40 +4,48 @@
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1263,
-      "end": 1263,
+      "start": 3835,
+      "end": 3836,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1265,
-      "end": 1266,
+      "start": 3838,
+      "end": 3841,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1269,
-      "end": 1270,
+      "start": 3843,
+      "end": 3847,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1275,
-      "end": 1277,
+      "start": 3860,
+      "end": 3864,
       "digits": 4,
       "extension": ".jpg"
     },
     {
       "type": "range",
       "prefix": "frame_",
-      "start": 1901,
-      "end": 1903,
+      "start": 3866,
+      "end": 3869,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 3873,
+      "end": 3873,
       "digits": 4,
       "extension": ".jpg"
     }

@@ -26,8 +26,258 @@
     "file": "frames_people_3.json"
   },
   {
+    "id": "person_2",
+    "name": "Person 2 (2429 frames)",
+    "file": "frames_person_2.json"
+  },
+  {
+    "id": "person_24",
+    "name": "Person 24 (884 frames)",
+    "file": "frames_person_24.json"
+  },
+  {
+    "id": "person_1",
+    "name": "Person 1 (376 frames)",
+    "file": "frames_person_1.json"
+  },
+  {
+    "id": "person_11",
+    "name": "Person 11 (143 frames)",
+    "file": "frames_person_11.json"
+  },
+  {
+    "id": "person_25",
+    "name": "Person 25 (130 frames)",
+    "file": "frames_person_25.json"
+  },
+  {
+    "id": "person_54",
+    "name": "Person 54 (104 frames)",
+    "file": "frames_person_54.json"
+  },
+  {
+    "id": "person_46",
+    "name": "Person 46 (101 frames)",
+    "file": "frames_person_46.json"
+  },
+  {
+    "id": "person_13",
+    "name": "Person 13 (99 frames)",
+    "file": "frames_person_13.json"
+  },
+  {
+    "id": "person_3",
+    "name": "Person 3 (96 frames)",
+    "file": "frames_person_3.json"
+  },
+  {
+    "id": "person_34",
+    "name": "Person 34 (95 frames)",
+    "file": "frames_person_34.json"
+  },
+  {
+    "id": "person_26",
+    "name": "Person 26 (83 frames)",
+    "file": "frames_person_26.json"
+  },
+  {
+    "id": "person_9",
+    "name": "Person 9 (83 frames)",
+    "file": "frames_person_9.json"
+  },
+  {
+    "id": "person_16",
+    "name": "Person 16 (76 frames)",
+    "file": "frames_person_16.json"
+  },
+  {
+    "id": "person_15",
+    "name": "Person 15 (73 frames)",
+    "file": "frames_person_15.json"
+  },
+  {
+    "id": "person_12",
+    "name": "Person 12 (69 frames)",
+    "file": "frames_person_12.json"
+  },
+  {
+    "id": "person_42",
+    "name": "Person 42 (64 frames)",
+    "file": "frames_person_42.json"
+  },
+  {
+    "id": "person_5",
+    "name": "Person 5 (63 frames)",
+    "file": "frames_person_5.json"
+  },
+  {
+    "id": "person_22",
+    "name": "Person 22 (58 frames)",
+    "file": "frames_person_22.json"
+  },
+  {
+    "id": "person_31",
+    "name": "Person 31 (58 frames)",
+    "file": "frames_person_31.json"
+  },
+  {
+    "id": "person_20",
+    "name": "Person 20 (58 frames)",
+    "file": "frames_person_20.json"
+  },
+  {
+    "id": "person_17",
+    "name": "Person 17 (56 frames)",
+    "file": "frames_person_17.json"
+  },
+  {
+    "id": "person_10",
+    "name": "Person 10 (53 frames)",
+    "file": "frames_person_10.json"
+  },
+  {
+    "id": "person_7",
+    "name": "Person 7 (52 frames)",
+    "file": "frames_person_7.json"
+  },
+  {
+    "id": "person_29",
+    "name": "Person 29 (46 frames)",
+    "file": "frames_person_29.json"
+  },
+  {
+    "id": "person_18",
+    "name": "Person 18 (43 frames)",
+    "file": "frames_person_18.json"
+  },
+  {
+    "id": "person_35",
+    "name": "Person 35 (40 frames)",
+    "file": "frames_person_35.json"
+  },
+  {
+    "id": "person_23",
+    "name": "Person 23 (40 frames)",
+    "file": "frames_person_23.json"
+  },
+  {
+    "id": "person_8",
+    "name": "Person 8 (38 frames)",
+    "file": "frames_person_8.json"
+  },
+  {
+    "id": "person_39",
+    "name": "Person 39 (38 frames)",
+    "file": "frames_person_39.json"
+  },
+  {
+    "id": "person_52",
+    "name": "Person 52 (35 frames)",
+    "file": "frames_person_52.json"
+  },
+  {
+    "id": "person_50",
+    "name": "Person 50 (35 frames)",
+    "file": "frames_person_50.json"
+  },
+  {
+    "id": "person_44",
+    "name": "Person 44 (31 frames)",
+    "file": "frames_person_44.json"
+  },
+  {
+    "id": "person_45",
+    "name": "Person 45 (31 frames)",
+    "file": "frames_person_45.json"
+  },
+  {
+    "id": "person_4",
+    "name": "Person 4 (27 frames)",
+    "file": "frames_person_4.json"
+  },
+  {
+    "id": "person_48",
+    "name": "Person 48 (25 frames)",
+    "file": "frames_person_48.json"
+  },
+  {
+    "id": "person_38",
+    "name": "Person 38 (22 frames)",
+    "file": "frames_person_38.json"
+  },
+  {
+    "id": "person_36",
+    "name": "Person 36 (21 frames)",
+    "file": "frames_person_36.json"
+  },
+  {
+    "id": "person_33",
+    "name": "Person 33 (20 frames)",
+    "file": "frames_person_33.json"
+  },
+  {
+    "id": "person_37",
+    "name": "Person 37 (19 frames)",
+    "file": "frames_person_37.json"
+  },
+  {
+    "id": "person_19",
+    "name": "Person 19 (19 frames)",
+    "file": "frames_person_19.json"
+  },
+  {
+    "id": "person_21",
+    "name": "Person 21 (18 frames)",
+    "file": "frames_person_21.json"
+  },
+  {
+    "id": "person_27",
+    "name": "Person 27 (17 frames)",
+    "file": "frames_person_27.json"
+  },
+  {
+    "id": "person_41",
+    "name": "Person 41 (15 frames)",
+    "file": "frames_person_41.json"
+  },
+  {
+    "id": "person_51",
+    "name": "Person 51 (13 frames)",
+    "file": "frames_person_51.json"
+  },
+  {
     "id": "person_0",
-    "name": "Person 0 (5113 frames)",
+    "name": "Person 0 (11 frames)",
     "file": "frames_person_0.json"
+  },
+  {
+    "id": "person_14",
+    "name": "Person 14 (10 frames)",
+    "file": "frames_person_14.json"
+  },
+  {
+    "id": "person_40",
+    "name": "Person 40 (9 frames)",
+    "file": "frames_person_40.json"
+  },
+  {
+    "id": "person_53",
+    "name": "Person 53 (9 frames)",
+    "file": "frames_person_53.json"
+  },
+  {
+    "id": "person_49",
+    "name": "Person 49 (8 frames)",
+    "file": "frames_person_49.json"
+  },
+  {
+    "id": "person_6",
+    "name": "Person 6 (7 frames)",
+    "file": "frames_person_6.json"
+  },
+  {
+    "id": "person_30",
+    "name": "Person 30 (4 frames)",
+    "file": "frames_person_30.json"
   }
 ]

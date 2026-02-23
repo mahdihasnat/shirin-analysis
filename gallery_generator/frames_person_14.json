@@ -1,0 +1,29 @@
+{
+  "basePath": "../frame_extractor/output",
+  "items": [
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 1044,
+      "end": 1047,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 1050,
+      "end": 1054,
+      "digits": 4,
+      "extension": ".jpg"
+    },
+    {
+      "type": "range",
+      "prefix": "frame_",
+      "start": 1059,
+      "end": 1059,
+      "digits": 4,
+      "extension": ".jpg"
+    }
+  ]
+}

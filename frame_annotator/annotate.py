@@ -7,7 +7,7 @@ import urllib.request
 import numpy as np
 import multiprocessing
 from deepface import DeepFace
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import AgglomerativeClustering
 
 def compress_to_ranges(items):
     """
@@ -205,7 +205,7 @@ def main():
     parser.add_argument("--frames-dir", default="../frame_extractor/output", help="Directory containing frames")
     parser.add_argument("--output-dir", default="../gallery_generator", help="Directory to save JSON files")
     parser.add_argument("--confidence", type=float, default=0.5, help="Minimum detection confidence (0.0-1.0)")
-    parser.add_argument("--eps", type=restrict_float_range, default=0.45, help="DBSCAN epsilon for face clustering (0.0 to 2.0 for cosine distance. Higher = fewer clusters)")
+    parser.add_argument("--threshold", type=restrict_float_range, default=0.45, help="Distance threshold for hierarchical clustering (0.0 to 2.0 for cosine distance. Higher = fewer clusters)")
     
     args = parser.parse_args()
 
@@ -304,19 +304,22 @@ def main():
         # Convert embeddings to numpy array
         X = np.array([item["embedding"] for item in all_faces_data])
         
-        # Use cosine distance for facial embeddings
-        # eps parameter determines how close faces need to be to be the "same person"
+        # Use agglomerative clustering to prevent "chaining" effect seen in DBSCAN
         # 0.45 is a decent starting point for Facenet cosine distance
-        dbscan = DBSCAN(eps=args.eps, min_samples=3, metric="cosine")
-        labels = dbscan.fit_predict(X)
+        clusterer = AgglomerativeClustering(n_clusters=None, distance_threshold=args.threshold, metric="cosine", linkage="average")
+        labels = clusterer.fit_predict(X)
+        
+        # Filter out clusters with very few faces to remove noise
+        unique, counts = np.unique(labels, return_counts=True)
+        valid_labels = set(unique[counts >= 3])
         
         # Map labels back to metadata
         for i, item in enumerate(all_faces_data):
             label = int(labels[i])
             filename = item["filename"]
             
-            # Label -1 means noise (unidentified person)
-            person_id = None if label == -1 else label
+            # Label None means noise (unidentified person or false positive)
+            person_id = label if label in valid_labels else None
             
             faces_metadata[filename].append({
                 "box": item["bbox"],
